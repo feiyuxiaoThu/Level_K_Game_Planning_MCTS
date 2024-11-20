@@ -7,8 +7,6 @@
  */
 
 #pragma once
-#ifndef __PLANNER_HPP
-#define __PLANNER_HPP
 
 #include <yaml-cpp/yaml.h>
 
@@ -16,9 +14,9 @@
 #include "vehicle_base.hpp"
 
 class MonteCarloTreeSearch {
-private:
+  private:
     /* data */
-public:
+  public:
     static double EXPLORATE_RATE;
     static double LAMDA;
     static double WEIGHT_AVOID;
@@ -53,21 +51,19 @@ public:
     std::shared_ptr<Node> get_best_child(std::shared_ptr<Node> node, double scalar);
     double default_policy(std::shared_ptr<Node> node);
     void update(std::shared_ptr<Node> node, double r);
-
 };
 
 class KLevelPlanner {
-private:
+  private:
     int steps;
     YAML::Node config;
 
-    KLevelPlanner(const KLevelPlanner &single) = delete;
-    const KLevelPlanner &operator=(const KLevelPlanner &single) = delete;
-    KLevelPlanner(const YAML::Node& cfg) : config(cfg) {
-        steps = cfg["max_step"].as<int>();
-    }
+    KLevelPlanner(const KLevelPlanner& single) = delete;
+    const KLevelPlanner& operator=(const KLevelPlanner& single) = delete;
+    KLevelPlanner(const YAML::Node& cfg) : config(cfg) { steps = cfg["max_step"].as<int>(); }
     ~KLevelPlanner() {}
-public:
+
+  public:
     static KLevelPlanner& get_instance(const YAML::Node& cfg) {
         static KLevelPlanner planner_(cfg);
         return planner_;
@@ -76,9 +72,6 @@ public:
     std::pair<Action, StateList> planning(VehicleBase& ego) const;
     std::pair<std::vector<Action>, StateList> forward_simulate(
         const VehicleBase& ego, const std::vector<StateList>& traj) const;
-    std::vector<StateList> get_prediction(
-        const VehicleBase& ego, const std::vector<VehicleBase>& others) const;
+    std::vector<StateList> get_prediction(const VehicleBase& ego,
+                                          const std::vector<VehicleBase>& others) const;
 };
-
-
-#endif

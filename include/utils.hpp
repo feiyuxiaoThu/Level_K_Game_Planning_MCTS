@@ -7,8 +7,6 @@
  */
 
 #pragma once
-#ifndef __UTILS_HPP
-#define __UTILS_HPP
 
 #include <chrono>
 #include <vector>
@@ -21,19 +19,18 @@
 
 #include <Eigen/Core>
 
-
-enum class Action {MAINTAIN, TURNLEFT, TURNRIGHT, ACCELERATE, DECELERATE, BRAKE};
+enum class Action { MAINTAIN, TURNLEFT, TURNRIGHT, ACCELERATE, DECELERATE, BRAKE };
 const std::vector<Action> ACTION_LIST = {
-    Action::MAINTAIN,   // (0, 0)
-    Action::TURNLEFT,   // (0, pi/4)
-    Action::TURNRIGHT,  // (0, -pi/4)
-    Action::ACCELERATE, // (2.5, 0)
-    Action::DECELERATE, // (-2.5, 0)
-    Action::BRAKE       // (-5.0, 0)
+    Action::MAINTAIN,    // (0, 0)
+    Action::TURNLEFT,    // (0, pi/4)
+    Action::TURNRIGHT,   // (0, -pi/4)
+    Action::ACCELERATE,  // (2.5, 0)
+    Action::DECELERATE,  // (-2.5, 0)
+    Action::BRAKE        // (-5.0, 0)
 };
 
 class Random {
-private:
+  private:
     static std::default_random_engine engine;
 
     Random() = delete;
@@ -41,7 +38,8 @@ private:
     Random& operator=(const Random&) = delete;
     Random(Random&&) = delete;
     Random& operator=(Random&&) = delete;
-public:
+
+  public:
     static int uniform(int _min, int _max);
     static double uniform(double _min, double _max);
     template <typename T>
@@ -56,7 +54,7 @@ public:
 };
 
 class TicToc {
-public:
+  public:
     TicToc(void) { tic(); }
 
     void tic(void) { start = std::chrono::system_clock::now(); }
@@ -67,31 +65,28 @@ public:
         return elapsed_seconds.count();
     }
 
-private:
+  private:
     std::chrono::time_point<std::chrono::system_clock> start, end;
 };
 
 class State {
-private:
+  private:
     /* data */
-public:
+  public:
     double x;
     double y;
     double yaw;
     double v;
 
     State() : x(0), y(0), yaw(0), v(0) {}
-    State(double _x, double _y, double _yaw, double _v) :
-        x(_x), y(_y), yaw(_yaw), v(_v) {}
+    State(double _x, double _y, double _yaw, double _v) : x(_x), y(_y), yaw(_yaw), v(_v) {}
     ~State() {}
 
-    std::vector<double> to_vector(void) {
-        return std::vector<double>{x, y, yaw, v};
-    }
+    std::vector<double> to_vector(void) { return std::vector<double>{x, y, yaw, v}; }
 };
 
 class StateList {
-private:
+  private:
     std::vector<State> states;
     std::vector<std::vector<double>> state_list;
     std::vector<std::vector<double>> state_list_trans;
@@ -104,7 +99,8 @@ private:
         std::vector<double> state_vec_tmp = {state.x, state.y, state.yaw, state.v};
         state_list.emplace_back(state_vec_tmp);
     }
-public:
+
+  public:
     StateList() {
         states.clear();
         state_list.clear();
@@ -123,13 +119,9 @@ public:
     }
     ~StateList() {}
 
-    size_t size(void) {
-        return states.size();
-    }
+    size_t size(void) { return states.size(); }
 
-    void push_back(const State& state) {
-        this->append(state);
-    }
+    void push_back(const State& state) { this->append(state); }
 
     void reverse(void) {
         std::reverse(states.begin(), states.end());
@@ -141,16 +133,16 @@ public:
 
     void expand(int excepted_len) {
         if (states.size() < 1) {
-            return ;
+            return;
         }
-       State expand_state = states[-1];
-       expand(excepted_len, expand_state);
+        State expand_state = states[-1];
+        expand(excepted_len, expand_state);
     }
 
     void expand(int excepted_len, const State& expand_state) {
         size_t cur_size = states.size();
         if (cur_size >= excepted_len) {
-            return ;
+            return;
         }
 
         for (size_t it = 0; it < excepted_len - cur_size; ++it) {
@@ -180,27 +172,19 @@ public:
         return states[index];
     }
 
-    auto begin() {
-        return states.begin();
-    }
+    auto begin() { return states.begin(); }
 
-    auto end() {
-        return states.end();
-    }
+    auto end() { return states.end(); }
 
-    auto begin() const {
-        return states.begin();
-    }
+    auto begin() const { return states.begin(); }
 
-    auto end() const {
-        return states.end();
-    }
+    auto end() const { return states.end(); }
 };
 
 class Node : public std::enable_shared_from_this<Node> {
-private:
+  private:
     /* data */
-public:
+  public:
     static int MAX_LEVEL;
     // static double (*calc_value_callback)(std::shared_ptr<Node>, double);
     static std::function<double(std::shared_ptr<Node>, double)> calc_value_callback;
@@ -216,9 +200,14 @@ public:
     std::vector<std::shared_ptr<Node>> children;
     std::vector<Action> actions;
     StateList other_agent_state;
-    
+
     Node() = delete;
-    Node(State _state, int _level, std::shared_ptr<Node> p, Action act, StateList others, State goal);
+    Node(State _state,
+         int _level,
+         std::shared_ptr<Node> p,
+         Action act,
+         StateList others,
+         State goal);
     ~Node() {}
 
     static void initialize(int max_level, double (*callback)(std::shared_ptr<Node>, double)) {
@@ -234,12 +223,10 @@ public:
 
 namespace utils {
 
-    std::string get_action_name(Action action);
-    Eigen::Vector2d get_action_value(Action act);
-    bool has_overlap(Eigen::MatrixXd box2d_0, Eigen::MatrixXd box2d_1);
-    State kinematic_propagate(const State& state, Eigen::Vector2d act, double dt);
-    std::string absolute_path(std::string path);
-    std::vector<float> imread(std::string filename, int& rows, int& cols, int& colors);
-}
-
-#endif
+std::string get_action_name(Action action);
+Eigen::Vector2d get_action_value(Action act);
+bool has_overlap(Eigen::MatrixXd box2d_0, Eigen::MatrixXd box2d_1);
+State kinematic_propagate(const State& state, Eigen::Vector2d act, double dt);
+std::string absolute_path(std::string path);
+std::vector<float> imread(std::string filename, int& rows, int& cols, int& colors);
+}  // namespace utils

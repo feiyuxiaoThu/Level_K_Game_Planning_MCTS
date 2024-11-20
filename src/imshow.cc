@@ -17,7 +17,7 @@
 namespace plt = matplotlibcpp;
 using std::vector;
 
-vector<float> imread(std::string filename, int& rows, int& cols, int& colors) {
+vector<float> imread(std::string filename, int &rows, int &cols, int &colors) {
     vector<float> image;
     std::ifstream file(filename);
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     int colors;
     vector<float> image =
         imread("/home/puyu/Codes/vehicle-interaction-decision-making/img/vehicle/blue.mat.txt",
-        rows, cols, colors);
+               rows, cols, colors);
 
     PyRun_SimpleString("import sys");
     PyRun_SimpleString(fmt::format("sys.path.append('{}')", script_path).c_str());
@@ -79,11 +79,11 @@ int main(int argc, char *argv[]) {
             std::vector<double> x{0, 0, 1.57};
             std::vector<double> y{5, 2};
 
-            PyObject* state = matplotlibcpp::detail::get_array(x);
-            PyObject* vehicle_para = matplotlibcpp::detail::get_array(y);
-            npy_intp dims[3] = { rows, cols, colors };
+            PyObject *state = matplotlibcpp::detail::get_array(x);
+            PyObject *vehicle_para = matplotlibcpp::detail::get_array(y);
+            npy_intp dims[3] = {rows, cols, colors};
 
-            const float* imptr = &(image[0]);
+            const float *imptr = &(image[0]);
 
             PyObject *args = PyTuple_New(3);
             PyTuple_SetItem(args, 0, PyArray_SimpleNewFromData(3, dims, NPY_FLOAT, (void *)imptr));
@@ -102,8 +102,7 @@ int main(int argc, char *argv[]) {
             }
             Py_DECREF(pFunc);
         } else {
-            if (PyErr_Occurred())
-                PyErr_Print();
+            if (PyErr_Occurred()) PyErr_Print();
             fprintf(stderr, "Cannot find function \"my_function\"\n");
         }
         Py_DECREF(pModule);

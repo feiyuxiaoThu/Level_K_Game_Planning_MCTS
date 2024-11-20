@@ -7,8 +7,6 @@
  */
 
 #pragma once
-#ifndef __VEHICLE_HPP
-#define __VEHICLE_HPP
 
 #include <set>
 #include <string>
@@ -22,7 +20,7 @@
 #include "planner.hpp"
 
 class Vehicle : public VehicleBase {
-private:
+  private:
     double dt;
     KLevelPlanner& planner;
     double init_x_min;
@@ -43,7 +41,8 @@ private:
     };
     Outlook outlook;
     void imshow(const Outlook& out, const State& state, std::vector<double> para);
-public:
+
+  public:
     std::string color;
     Action cur_action;
     StateList excepted_traj;
@@ -58,29 +57,24 @@ public:
     void reset(void);
     void excute(void);
     void draw_vehicle(std::string draw_style = "realistic", bool fill_mode = false);
-    bool operator==(const Vehicle& other) const {
-        return name == other.name;
-    }
-    bool operator!=(const Vehicle& other) const {
-        return name != other.name;
-    }
+    bool operator==(const Vehicle& other) const { return name == other.name; }
+    bool operator!=(const Vehicle& other) const { return name != other.name; }
 };
 
 class VehicleList {
-private:
+  private:
     std::vector<std::shared_ptr<Vehicle>> vehicle_list;
     std::set<std::string> vehicle_names;
-public:
+
+  public:
     VehicleList() {
         vehicle_list.clear();
         vehicle_names.clear();
     }
-    VehicleList(std::vector<std::shared_ptr<Vehicle>> vehicles) : vehicle_list(vehicles) { }
+    VehicleList(std::vector<std::shared_ptr<Vehicle>> vehicles) : vehicle_list(vehicles) {}
     ~VehicleList() {}
 
-    size_t size(void) {
-        return vehicle_list.size();
-    }
+    size_t size(void) { return vehicle_list.size(); }
     bool is_all_get_target(void);
     bool is_any_collision(void);
     void push_back(std::shared_ptr<Vehicle> vehicle);
@@ -90,25 +84,13 @@ public:
     void update_track_objects(void);
     std::vector<VehicleBase> exclude(int ego_idx);
     std::vector<VehicleBase> exclude(std::shared_ptr<Vehicle> ego);
-    std::shared_ptr<Vehicle> operator[](size_t index) {
-        return vehicle_list[index];
-    }
+    std::shared_ptr<Vehicle> operator[](size_t index) { return vehicle_list[index]; }
     std::shared_ptr<Vehicle> operator[](std::string name);
-    auto begin() {
-        return vehicle_list.begin();
-    }
+    auto begin() { return vehicle_list.begin(); }
 
-    auto end() {
-        return vehicle_list.end();
-    }
+    auto end() { return vehicle_list.end(); }
 
-    auto begin() const {
-        return vehicle_list.begin();
-    }
+    auto begin() const { return vehicle_list.begin(); }
 
-    auto end() const {
-        return vehicle_list.end();
-    }
+    auto end() const { return vehicle_list.end(); }
 };
-
-#endif

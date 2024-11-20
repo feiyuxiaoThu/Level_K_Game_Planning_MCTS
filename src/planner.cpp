@@ -23,7 +23,8 @@ double MonteCarloTreeSearch::WEIGHT_DIRECTION = 1;
 double MonteCarloTreeSearch::WEIGHT_DISTANCE = 0.1;
 double MonteCarloTreeSearch::WEIGHT_VELOCITY = 0.05;
 
-MonteCarloTreeSearch::MonteCarloTreeSearch(const std::vector<StateList>& other_traj, const YAML::Node& cfg) {
+MonteCarloTreeSearch::MonteCarloTreeSearch(const std::vector<StateList>& other_traj,
+                                           const YAML::Node& cfg) {
     computation_budget = cfg["computation_budget"].as<uint64_t>();
     dt = cfg["delta_t"].as<double>();
 
@@ -68,11 +69,10 @@ double MonteCarloTreeSearch::calc_cur_value(std::shared_ptr<Node> node, double l
     if (MonteCarloTreeSearch::is_opposite_direction(node->state, ego_box2d)) {
         direction = -1;
     }
-    
+
     double delta_yaw = std::fmod(abs(yaw - node->goal_pose.yaw), TWO_PI);
     delta_yaw = std::min(delta_yaw, TWO_PI - delta_yaw);
-    double distance = -(abs(x - node->goal_pose.x) + abs(y - node->goal_pose.y) +
-                        1.5 * delta_yaw);
+    double distance = -(abs(x - node->goal_pose.x) + abs(y - node->goal_pose.y) + 1.5 * delta_yaw);
 
     double cur_reward = MonteCarloTreeSearch::WEIGHT_AVOID * avoid +
                         MonteCarloTreeSearch::WEIGHT_SAFE * safe +
@@ -80,7 +80,8 @@ double MonteCarloTreeSearch::calc_cur_value(std::shared_ptr<Node> node, double l
                         MonteCarloTreeSearch::WEIGHT_DISTANCE * distance +
                         MonteCarloTreeSearch::WEIGHT_DIRECTION * direction +
                         MonteCarloTreeSearch::WEIGHT_VELOCITY * velocity;
-    double total_reward = last_node_value + pow(MonteCarloTreeSearch::LAMDA, (step - 1)) * cur_reward;
+    double total_reward =
+        last_node_value + pow(MonteCarloTreeSearch::LAMDA, (step - 1)) * cur_reward;
     node->value = total_reward;
 
     return total_reward;
@@ -170,7 +171,8 @@ std::shared_ptr<Node> MonteCarloTreeSearch::expand(std::shared_ptr<Node> node) {
     return node->children.back();
 }
 
-std::shared_ptr<Node> MonteCarloTreeSearch::get_best_child(std::shared_ptr<Node> node, double scalar) {
+std::shared_ptr<Node> MonteCarloTreeSearch::get_best_child(std::shared_ptr<Node> node,
+                                                           double scalar) {
     double best_score = -INFINITY;
     std::vector<std::shared_ptr<Node>> best_children;
 
@@ -234,7 +236,7 @@ std::pair<Action, StateList> KLevelPlanner::planning(VehicleBase& ego) const {
 }
 
 std::pair<std::vector<Action>, StateList> KLevelPlanner::forward_simulate(
-                                const VehicleBase& ego, const std::vector<StateList>& traj) const {
+    const VehicleBase& ego, const std::vector<StateList>& traj) const {
     MonteCarloTreeSearch mcts(traj, config);
     std::shared_ptr<Node> current_node =
         std::make_shared<Node>(ego.state, 0, nullptr, Action::MAINTAIN, StateList(), ego.target);
@@ -261,8 +263,8 @@ std::pair<std::vector<Action>, StateList> KLevelPlanner::forward_simulate(
     return std::make_pair(actions, expected_traj);
 }
 
-std::vector<StateList> KLevelPlanner::get_prediction(
-    const VehicleBase& ego, const std::vector<VehicleBase>& others) const {
+std::vector<StateList> KLevelPlanner::get_prediction(const VehicleBase& ego,
+                                                     const std::vector<VehicleBase>& others) const {
     std::vector<StateList> pred_trajectory;
 
     if (ego.level == 0) {
@@ -291,7 +293,8 @@ std::vector<StateList> KLevelPlanner::get_prediction(
                     exchanged_others.push_back(others[i]);
                 }
             }
-            std::vector<StateList> exchage_pred_others = get_prediction(exchanged_ego, exchanged_others);
+            std::vector<StateList> exchage_pred_others =
+                get_prediction(exchanged_ego, exchanged_others);
             auto pred_idx_vechicle = forward_simulate(exchanged_ego, exchage_pred_others);
             pred_trajectory.emplace_back(pred_idx_vechicle.second);
         }

@@ -1,0 +1,10 @@
+---
+BasedOnStyle: google
+IndentWidth: 4
+AccessModifierOffset: -2
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackParameters: false
+SortIncludes: false
+ColumnLimit:  100
+...
+

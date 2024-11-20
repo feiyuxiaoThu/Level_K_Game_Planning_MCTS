@@ -7,8 +7,6 @@
  */
 
 #pragma once
-#ifndef __TRACED_OBJECT_HPP
-#define __TRACED_OBJECT_HPP
 
 #include <string>
 #include <vector>
@@ -17,14 +15,13 @@
 
 struct PredictTraj {
     double confidence;
-    StateList traj; 
+    StateList traj;
 };
 
-
 class TrackedObject {
-private:
+  private:
     /* data */
-public:
+  public:
     std::string name;
     State state;
     State target;
@@ -38,10 +35,5 @@ public:
         state = State(0, 0, 0, 0);
         predict_trajs.clear();
     }
-    ~TrackedObject() {
-
-    }
+    ~TrackedObject() {}
 };
-
-
-#endif

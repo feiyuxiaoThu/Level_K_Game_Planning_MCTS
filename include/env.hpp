@@ -7,16 +7,12 @@
  */
 
 #pragma once
-#ifndef __ENV_HPP
-#define __ENV_HPP
 
 #include <vector>
 #include <Eigen/Core>
 
 class EnvCrossroads {
-private:
-
-public:
+  public:
     double map_size;
     double lanewidth;
 
@@ -30,6 +26,3 @@ public:
     ~EnvCrossroads() {}
     void draw_env(void);
 };
-
-
-#endif

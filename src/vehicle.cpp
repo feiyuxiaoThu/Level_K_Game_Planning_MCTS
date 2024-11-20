@@ -33,9 +33,8 @@ const std::vector<std::pair<std::string, std::string>> vehicle_show_config = {
 int Vehicle::global_vehicle_idx = 0;
 PyObject* Vehicle::imshow_func = nullptr;
 
-Vehicle::Vehicle(
-    std::string _name, const YAML::Node& cfg) :
-        VehicleBase(_name), planner(KLevelPlanner::get_instance(cfg)) {
+Vehicle::Vehicle(std::string _name, const YAML::Node& cfg)
+    : VehicleBase(_name), planner(KLevelPlanner::get_instance(cfg)) {
     YAML::Node vehicle_info = cfg["vehicle_list"][_name];
     level = vehicle_info["level"].as<int>();
     init_x_min = vehicle_info["init"]["x"]["min"].as<double>();
@@ -76,7 +75,8 @@ Vehicle::Vehicle(
             imshow_func = PyObject_GetAttrString(py_module, "imshow");
         }
         if (imshow_func == nullptr || !PyCallable_Check(imshow_func)) {
-            spdlog::error("py.imshow call failed and the vehicle drawing will only support linestyle");
+            spdlog::error(
+                "py.imshow call failed and the vehicle drawing will only support linestyle");
             imshow_func = nullptr;
         }
     }
@@ -90,12 +90,12 @@ void Vehicle::imshow(const Outlook& out, const State& state, std::vector<double>
 
     PyObject* vehicle_state = matplotlibcpp::detail::get_array(state_list);
     PyObject* vehicle_para = matplotlibcpp::detail::get_array(para);
-    npy_intp dims[3] = { out.rows, out.cols, out.colors };
+    npy_intp dims[3] = {out.rows, out.cols, out.colors};
 
     const float* imptr = &(out.data[0]);
 
     PyObject* args = PyTuple_New(3);
-    PyTuple_SetItem(args, 0, PyArray_SimpleNewFromData(3, dims, NPY_FLOAT, (void *)imptr));
+    PyTuple_SetItem(args, 0, PyArray_SimpleNewFromData(3, dims, NPY_FLOAT, (void*)imptr));
     PyTuple_SetItem(args, 1, vehicle_state);
     PyTuple_SetItem(args, 2, vehicle_para);
 
@@ -135,14 +135,15 @@ void Vehicle::excute(void) {
     }
 }
 
-void Vehicle::draw_vehicle(std::string draw_style/* = "realistic"*/, bool fill_mode /* = false */) {
+void Vehicle::draw_vehicle(std::string draw_style /* = "realistic"*/,
+                           bool fill_mode /* = false */) {
     if (draw_style == "realistic" && imshow_func != nullptr) {
         imshow(outlook, state, {length, width});
     } else {
         Eigen::Matrix<double, 2, 2, Eigen::RowMajor> head;
         Eigen::Matrix2d rot;
-        head << 0.3 * VehicleBase::length, 0.3 * VehicleBase::length,
-                VehicleBase::width/2, -VehicleBase::width/2;
+        head << 0.3 * VehicleBase::length, 0.3 * VehicleBase::length, VehicleBase::width / 2,
+            -VehicleBase::width / 2;
         rot << cos(state.yaw), -sin(state.yaw), sin(state.yaw), cos(state.yaw);
 
         head = rot * head;
@@ -175,8 +176,9 @@ void VehicleList::reset(void) {
 }
 
 bool VehicleList::is_all_get_target(void) {
-    bool all_get_target = std::all_of(vehicle_list.begin(), vehicle_list.end(), 
-                            [](const std::shared_ptr<Vehicle> vehicle) {return vehicle->is_get_target();});
+    bool all_get_target = std::all_of(
+        vehicle_list.begin(), vehicle_list.end(),
+        [](const std::shared_ptr<Vehicle> vehicle) { return vehicle->is_get_target(); });
 
     return all_get_target;
 }
@@ -184,9 +186,8 @@ bool VehicleList::is_all_get_target(void) {
 bool VehicleList::is_any_collision(void) {
     for (int i = 0; i < vehicle_list.size() - 1; ++i) {
         for (int j = i + 1; j < vehicle_list.size(); ++j) {
-            if (utils::has_overlap(
-                    VehicleBase::get_box2d(vehicle_list[i]->state),
-                    VehicleBase::get_box2d(vehicle_list[j]->state))) {
+            if (utils::has_overlap(VehicleBase::get_box2d(vehicle_list[i]->state),
+                                   VehicleBase::get_box2d(vehicle_list[j]->state))) {
                 return true;
             }
         }
@@ -253,6 +254,6 @@ std::vector<VehicleBase> VehicleList::exclude(std::shared_ptr<Vehicle> ego) {
             exclude_list.push_back(*vehicle);
         }
     }
-    
+
     return exclude_list;
 }

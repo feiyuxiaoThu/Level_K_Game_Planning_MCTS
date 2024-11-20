@@ -29,20 +29,21 @@ using std::string;
 namespace plt = matplotlibcpp;
 
 static struct option long_options[] = {
-    {"rounds", required_argument, 0, 'r'},
-    {"output_path", required_argument, 0, 'o'},
-    {"log_level", required_argument, 0, 'l'},
-    {"config", required_argument, 0, 'c'},
-    {"no_animation", no_argument, 0, 'n'},
-    {"save_fig", no_argument, 0, 'f'},
+    {"rounds", required_argument, 0, 'r'},    {"output_path", required_argument, 0, 'o'},
+    {"log_level", required_argument, 0, 'l'}, {"config", required_argument, 0, 'c'},
+    {"no_animation", no_argument, 0, 'n'},    {"save_fig", no_argument, 0, 'f'},
 };
 
-std::unordered_map<std::string, spdlog::level::level_enum> LOG_LEVEL_DICT =
-    {{"trace", spdlog::level::trace}, {"debug", spdlog::level::debug}, {"info", spdlog::level::info},
-     {"warn", spdlog::level::warn}, {"err", spdlog::level::err}, {"critical", spdlog::level::critical}};
+std::unordered_map<std::string, spdlog::level::level_enum> LOG_LEVEL_DICT = {
+    {"trace", spdlog::level::trace}, {"debug", spdlog::level::debug},
+    {"info", spdlog::level::info},   {"warn", spdlog::level::warn},
+    {"err", spdlog::level::err},     {"critical", spdlog::level::critical}};
 
-void run(int rounds_num, std::filesystem::path config_path,
-    std::filesystem::path save_path, bool show_animation, bool save_fig) {
+void run(int rounds_num,
+         std::filesystem::path config_path,
+         std::filesystem::path save_path,
+         bool show_animation,
+         bool save_fig) {
     YAML::Node config;
     spdlog::info("config path: {}", config_path.string());
     try {
@@ -50,7 +51,7 @@ void run(int rounds_num, std::filesystem::path config_path,
         // spdlog::info("config parameters:\n{}", YAML::Dump(config));
     } catch (const YAML::Exception& e) {
         spdlog::error("Error parsing YAML file: {}", e.what());
-        return ;
+        return;
     }
 
     // initialize
@@ -78,7 +79,7 @@ void run(int rounds_num, std::filesystem::path config_path,
     }
     if (vehicles.size() < 1) {
         spdlog::error("Please set the vehicles parameters in the configuration file !");
-        return ;
+        return;
     }
     vehicles.set_track_objects();
 
@@ -88,8 +89,8 @@ void run(int rounds_num, std::filesystem::path config_path,
 
         spdlog::info("================== Round {} ==================", iter);
         for (auto vehicle : vehicles) {
-            spdlog::info("{} >>> init_x: {:.2f}, init_y: {:.2f}, init_v: {:.2f}",
-                        vehicle->name, vehicle->state.x, vehicle->state.y, vehicle->state.v);
+            spdlog::info("{} >>> init_x: {:.2f}, init_y: {:.2f}, init_v: {:.2f}", vehicle->name,
+                         vehicle->state.x, vehicle->state.y, vehicle->state.v);
         }
 
         double timestamp = 0.0;
@@ -103,19 +104,17 @@ void run(int rounds_num, std::filesystem::path config_path,
                 break;
             }
 
-            if ( vehicles.is_any_collision() || timestamp > max_simulation_time) {
+            if (vehicles.is_any_collision() || timestamp > max_simulation_time) {
                 spdlog::info(
-                    "Round {:d} failed, simulation time: {:.3f} s, actual timecost: {:.3f} s",
-                    iter, timestamp, total_cost_time.toc());
+                    "Round {:d} failed, simulation time: {:.3f} s, actual timecost: {:.3f} s", iter,
+                    timestamp, total_cost_time.toc());
                 break;
             }
 
             TicToc iter_cost_time;
             std::vector<std::thread> threads;
             for (std::shared_ptr<Vehicle>& vehicle : vehicles) {
-                std::thread thread([&vehicle]() {
-                    vehicle->excute();
-                });
+                std::thread thread([&vehicle]() { vehicle->excute(); });
                 threads.emplace_back(std::move(thread));
             }
 
@@ -126,8 +125,8 @@ void run(int rounds_num, std::filesystem::path config_path,
             }
 
             vehicles.update_track_objects();
-            spdlog::debug(
-                "simulation time {:.3f} step cost {:.3f} sec", timestamp, iter_cost_time.toc());  
+            spdlog::debug("simulation time {:.3f} step cost {:.3f} sec", timestamp,
+                          iter_cost_time.toc());
 
             if (show_animation) {
                 plt::cla();
@@ -135,27 +134,35 @@ void run(int rounds_num, std::filesystem::path config_path,
                 for (const std::shared_ptr<Vehicle>& vehicle : vehicles) {
                     auto excepted_traj = vehicle->excepted_traj.to_vector();
                     vehicle->draw_vehicle(vehicle_draw_style);
-                    plt::plot({vehicle->target.x}, {vehicle->target.y}, {{"marker", "x"}, {"color", vehicle->color}});
-                    plt::plot(excepted_traj[0], excepted_traj[1], {{"color", vehicle->color}, {"linewidth", "1"}});
+                    plt::plot({vehicle->target.x}, {vehicle->target.y},
+                              {{"marker", "x"}, {"color", vehicle->color}});
+                    plt::plot(excepted_traj[0], excepted_traj[1],
+                              {{"color", vehicle->color}, {"linewidth", "1"}});
                     plt::text(vehicle->vis_text_pos.x, vehicle->vis_text_pos.y + 3,
-                                fmt::format("level {:d}", vehicle->level), {{"color", vehicle->color}});
+                              fmt::format("level {:d}", vehicle->level),
+                              {{"color", vehicle->color}});
                     plt::text(vehicle->vis_text_pos.x, vehicle->vis_text_pos.y,
-                                fmt::format("v = {:.2f} m/s", vehicle->state.v), {{"color", vehicle->color}});
+                              fmt::format("v = {:.2f} m/s", vehicle->state.v),
+                              {{"color", vehicle->color}});
                     plt::text(vehicle->vis_text_pos.x, vehicle->vis_text_pos.y - 3,
-                                fmt::format("{}", utils::get_action_name(vehicle->cur_action)), {{"color", vehicle->color}});
+                              fmt::format("{}", utils::get_action_name(vehicle->cur_action)),
+                              {{"color", vehicle->color}});
                 }
                 if (is_show_predict_traj) {
                     if (ego_vehicle_name.empty()) {
                         ego_vehicle_name = vehicles[0]->name;
-                        spdlog::warn("ego_vehicle parameter in yaml is none, defualt: " + ego_vehicle_name);
+                        spdlog::warn("ego_vehicle parameter in yaml is none, defualt: " +
+                                     ego_vehicle_name);
                     }
                     for (const TrackedObject& obj : vehicles[ego_vehicle_name]->tracked_objects) {
                         for (const PredictTraj& predict_traj : obj.predict_trajs) {
                             double belief = predict_traj.confidence;
-                            std::vector<std::vector<double>> prediction = predict_traj.traj.to_vector();
-                            plt::plot(prediction[0], prediction[1], {{"color", "gray"}, {"linewidth", "1"}});
+                            std::vector<std::vector<double>> prediction =
+                                predict_traj.traj.to_vector();
+                            plt::plot(prediction[0], prediction[1],
+                                      {{"color", "gray"}, {"linewidth", "1"}});
                             plt::text(prediction[0].back(), prediction[1].back(),
-                                        fmt::format("{:.2f}", belief), {{"color", "gray"}});
+                                      fmt::format("{:.2f}", belief), {{"color", "gray"}});
                         }
                     }
                 }
@@ -177,7 +184,7 @@ void run(int rounds_num, std::filesystem::path config_path,
                     vehicle->draw_vehicle(vehicle_draw_style, true);
                 }
                 plt::text(vehicle->vis_text_pos.x, vehicle->vis_text_pos.y + 3,
-                            fmt::format("level {:d}", vehicle->level), {{"color", vehicle->color}});
+                          fmt::format("level {:d}", vehicle->level), {{"color", vehicle->color}});
             }
             plt::xlim(-map_size, map_size);
             plt::ylim(-map_size, map_size);
@@ -187,14 +194,15 @@ void run(int rounds_num, std::filesystem::path config_path,
                 plt::pause(1);
             }
             if (save_fig) {
-                plt::save((save_path / ( "Round_" + std::to_string(iter) + ".svg")).string(), 600);
+                plt::save((save_path / ("Round_" + std::to_string(iter) + ".svg")).string(), 600);
             }
         }
     }
 
     double succeed_rate = 100 * succeed_count / rounds_num;
     spdlog::info("\n=========================================");
-    spdlog::info("Experiment success {}/{}({:.2f}%) rounds.", succeed_count, rounds_num, succeed_rate);
+    spdlog::info("Experiment success {}/{}({:.2f}%) rounds.", succeed_count, rounds_num,
+                 succeed_rate);
 }
 
 int main(int argc, char** argv) {
@@ -203,10 +211,10 @@ int main(int argc, char** argv) {
 
     int rounds_num = 5;
     std::filesystem::path output_path = project_path / "logs";
-    std::filesystem::path config_path = project_path / "config" /"unprotected_left_turn.yaml";
+    std::filesystem::path config_path = project_path / "config" / "unprotected_left_turn.yaml";
     bool show_animation = true;
     bool save_flag = false;
-    std::string log_level = "info";     // info
+    std::string log_level = "info";  // info
 
     int opt, option_index = 0;
     while ((opt = getopt_long(argc, argv, "r:o:l:c:n:f:", long_options, &option_index)) != -1) {
@@ -243,7 +251,7 @@ int main(int argc, char** argv) {
         auto now = std::chrono::system_clock::now();
         std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
         struct tm now_tm;
-        localtime_r(&now_time_t, &now_tm); 
+        localtime_r(&now_time_t, &now_tm);
         std::stringstream ss;
         ss << std::put_time(&now_tm, "%Y-%m-%d-%H-%M-%S");
         output_path = output_path / ss.str();
