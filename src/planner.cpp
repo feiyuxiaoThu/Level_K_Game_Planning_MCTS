@@ -1,7 +1,7 @@
 /*
  * @Author: puyu <yuu.pu@foxmail.com>
  * @Date: 2024-05-26 21:14:51
- * @LastEditTime: 2024-10-31 00:59:50
+ * @LastEditTime: 2025-01-24 22:44:17
  * @FilePath: /vehicle-interaction-decision-making/src/planner.cpp
  * Copyright 2024 puyu, All Rights Reserved.
  */
@@ -179,7 +179,7 @@ std::shared_ptr<Node> MonteCarloTreeSearch::get_best_child(std::shared_ptr<Node>
     for (auto child : node->children) {
         double exploit = child->reward / child->visits;
         double explore = sqrt(2 * log(node->visits) / child->visits);
-        double score = exploit + scalar + explore;
+        double score = exploit + scalar * explore;
         if (score == best_score) {
             best_children.push_back(child);
         } else if (score > best_score) {
